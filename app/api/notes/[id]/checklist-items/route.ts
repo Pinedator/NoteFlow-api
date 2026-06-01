@@ -6,11 +6,12 @@ const itemSchema = z.object({
   text: z.string().min(1),
 });
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const items = await query(
       'SELECT * FROM checklist_items WHERE note_id = $1',
-      [params.id]
+      [id]
     );
     return NextResponse.json(items);
   } catch (error) {
@@ -19,8 +20,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const result = itemSchema.safeParse(body);
     if (!result.success) {
@@ -28,7 +30,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
     const [item] = await query(
       'INSERT INTO checklist_items (note_id, text) VALUES ($1, $2) RETURNING *',
-      [params.id, result.data.text]
+      [id, result.data.text]
     );
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
