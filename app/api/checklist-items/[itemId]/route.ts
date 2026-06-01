@@ -37,4 +37,4 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ itemId:
     console.error(error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
-}
+} 
